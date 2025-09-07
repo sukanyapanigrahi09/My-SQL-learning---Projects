@@ -1,0 +1,94 @@
+HOSPITAL DATASET : 
+
+DROP TABLE IF EXISTS Hospital;
+CREATE TABLE Hospital(
+Hospital_Name VARCHAR(100),
+Location VARCHAR(80),
+Department VARCHAR(100),
+Doctors_Count INT,
+Patients_Count INT,
+Admission_Date DATE, 
+Discharge_Date DATE,
+Medical_Expenses NUMERIC(14,2)
+);
+
+SELECT * FROM Hospital;
+
+COPY Hospital(Hospital_Name, Location, Department, Doctors_Count, Patients_Count, Admission_Date,	Discharge_Date,	Medical_Expenses)
+FROM 'C:\Users\Tnluser.PF308536\Downloads\Hospital_Data.csv'
+CSV HEADER;
+
+--Total Number of Patients (Write an SQL query to find the total number of patients across all hospitals.)
+SELECT SUM(patients_count) AS Total_patients
+FROM Hospital;
+
+--Average Number of Doctors per Hospital (Retrieve the average count of doctors available in each hospital.)
+SELECT hospital_name, AVG(doctors_count) AS Avg_num_doc
+FROM Hospital
+GROUP BY hospital_name;
+
+--Top 3 Departments with the Highest Number of Patients (Find the top 3 hospital departments that have the highest number of patients.)
+SELECT * FROM Hospital;
+SELECT department, patients_count 
+FROM Hospital ORDER BY patients_count DESC LIMIT 3;
+
+--Hospital with the Maximum Medical Expenses (Identify the hospital that recorded the highest medical expenses.)
+
+SELECT hospital_name, medical_expenses 
+FROM Hospital ORDER BY medical_expenses DESC LIMIT 1;
+
+--Daily Average Medical Expenses (Calculate the average medical expenses per day for each hospital.)
+SELECT 
+    hospital_name,
+    ROUND(AVG(medical_expenses / (discharge_date - admission_date)), 2) AS avg_daily_expense
+FROM 
+    Hospital
+WHERE 
+    discharge_date > admission_date
+GROUP BY 
+    hospital_name
+ORDER BY 
+    avg_daily_expense DESC;
+
+
+--Longest Hospital Stay (Find the patient with the longest stay by calculating the difference between, Discharge Date and Admission Date.)
+SELECT 
+    hospital_name,
+    discharge_date,
+    admission_date,
+    discharge_date - admission_date AS stay_length
+FROM Hospital ORDER BY stay_length DESC LIMIT 1;
+
+
+--Total Patients Treated Per City (Count the total number of patients treated in each city.)
+SELECT DISTINCT location, SUM(patients_count) AS Total_patients
+FROM Hospital
+GROUP BY location;
+
+--Average Length of Stay Per Department (Calculate the average number of days patients spend in each department. )
+SELECT 
+    department,
+    ROUND(AVG(discharge_date - admission_date), 2) AS avg_length_of_stay
+FROM 
+    Hospital
+GROUP BY 
+    department
+ORDER BY 
+    avg_length_of_stay DESC;
+
+--Identify the Department with the Lowest Number of Patients (Find the department with the least number of patients.)
+SELECT department, SUM(patients_count) AS total_patients
+FROM Hospital
+GROUP BY department
+ORDER BY total_patients ASC LIMIT 1;
+
+--Monthly Medical Expenses Report (Group the data by month and calculate the total medical expenses for each month.)
+SELECT 
+    TO_CHAR(admission_date, 'YYYY-MM') AS month,
+    ROUND(SUM(medical_expenses), 2) AS total_medical_expenses
+FROM 
+    Hospital
+GROUP BY 
+    TO_CHAR(admission_date, 'YYYY-MM')
+ORDER BY 
+    month;
